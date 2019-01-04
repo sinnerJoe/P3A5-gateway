@@ -5,8 +5,9 @@ const app = express();
 const cors = require("cors")
 const mongoose = require("mongoose");
 const ImageStack =  require("./src/models/image-stack");
-
 const base64 = require('./src/utils/base64-img')
+const sendFile = require('./src/utils/backend-requests').sendFile
+
 
 mongoose.connect("mongodb://localhost/p3a5", { useNewUrlParser: true});
 
@@ -40,29 +41,35 @@ app.post('/process-images', async (req, res) => {
         return
     }
     const testProcessed = []
-    for (let imageData of req.body.images) {
-        let parsedData;
-        try{
-            parsedData = base64.parseBase64(imageData);
-        }catch(err){
-            continue;
-        }
-            console.log("DATA FORMAT " + parsedData.format)
-        const savePath = base64.saveBase64(parsedData.content, parsedData.format)
-        testProcessed.push(savePath)
-    }
-    const stack = new ImageStack({
-      id: stackId,
-      unprocessed: [],
-      processed: testProcessed.map(v => {
-        return { path: v, lines: [], blocks: [] };
-      }),
-      finished: false
-    });
-    try{
+    try {
+        const stack = new ImageStack({
+            // id: stackId,
+            unprocessed: [],
+            // processed: testProcessed.map(v => {
+            //     return { path: v, lines: [], blocks: [] };
+            // }),
+            processed: [],
+            finished: false
+        });
+
         const savedStack = await stack.save()
+
+        res.send({ success: true, token: savedStack._id })
+
+        for (let imageData of req.body.images) {
+            let parsedData;
+            try{
+                parsedData = base64.parseBase64(imageData);
+            }catch(err){
+                continue;
+            }
+                console.log("DATA FORMAT " + parsedData.format)
+            const savePath = base64.saveBase64(parsedData.content, parsedData.format)
+            sendFile(savePath, savedStack._id)
+            ImageStack.update({_id: savedStack._id}, {$push: { unprocessed: savePath}})
+            testProcessed.push(savePath)
+        }
         
-        res.send({ success: true, token: savedStack._id})
     }catch(err){
         res.send({ success: false, message: err} )
         return;

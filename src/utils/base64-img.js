@@ -21,7 +21,7 @@ function parseClientBase64(data){
 
 function saveBase64ToFile(base64data, extension){
 
-    const savePath = paths.join("./images", uuid() + "." + extension)
+    const savePath = paths.join("images", uuid() + "." + extension)
     console.log("SAVE PATH: " + savePath)
     fs.writeFileSync(savePath, base64data, 'base64' )
     return savePath
