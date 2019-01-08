@@ -49,7 +49,8 @@ app.post('/process-images', async (req, res) => {
             //     return { path: v, lines: [], blocks: [] };
             // }),
             processed: [],
-            finished: false
+            total: req.body.images.length,
+            finished: 0
         });
 
         const savedStack = await stack.save()
@@ -87,10 +88,12 @@ app.get('/processed-data/:id', async (req, res) => {
 
         const imageStack = await ImageStack.findById(req.params.id)
         console.log(imageStack)
+        
         if(imageStack)
         res.send({ 
             processedImages: imageStack.processed, 
             finished: imageStack.finished,  
+            total: imageStack.total,
             success: true
         })
         else
