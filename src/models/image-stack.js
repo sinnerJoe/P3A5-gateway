@@ -27,7 +27,15 @@ const ImageStack = mongoose.model("ImageStack", {
         y1: Number,
         x2: Number,
         y2: Number
-      }
+      },
+      paragraphs: [
+        {
+          x1: Number,
+          y1: Number,
+          x2: Number,
+          y2: Number
+        }
+      ]
     }
   ],
   total: Number,

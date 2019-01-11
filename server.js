@@ -90,14 +90,14 @@ app.get('/processed-data/:id', async (req, res) => {
         console.log(imageStack)
         
         if(imageStack)
-        res.send({ 
-            processedImages: imageStack.processed, 
-            finished: imageStack.finished,  
-            total: imageStack.total,
-            success: true
-        })
+            res.send({ 
+                processedImages: imageStack.processed, 
+                finished: imageStack.finished,  
+                total: imageStack.total,
+                success: true
+            })
         else
-        res.send({success: false})
+            res.send({success: false})
     }catch(err){
         res.send({success: false, message: err})
     }

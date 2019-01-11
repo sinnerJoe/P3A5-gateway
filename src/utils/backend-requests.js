@@ -13,18 +13,26 @@ function parsePositionObject(obj){
 }
 
 function changeAnalyzedDataFormat(data){
+    if (!data.columns)
+        throw new Error("Error on data returned by backend")
+
     let result = {
         lines: [],
         blocks: [],
+        paragraphs: [],
         footnote: null
     }
-    console.log(data)
+    // console.log(data)
+    
     for(let block of data.columns){
         result.blocks.push(parsePositionObject(block))
         if(Array.isArray(block.lines))
         for(let line of block.lines){
             result.lines.push(parsePositionObject(line))
         }
+    }
+    for(let paragraph of data.paragraphs){
+        result.paragraphs.push(parsePositionObject(paragraph))
     }
     if(data.footnote){
         result.footnote = parsePositionObject(data.footnote)
@@ -39,30 +47,40 @@ function sendFile(path, id){
     const file = fs.createReadStream(path)
     console.log("OPENEND FILE " + file.readableLength)
     form.append('image', file)
-    form.submit("http://localhost:8080/segmentation", (err, response) => {
+    form.submit("http://localhost:8080/segmentation/solution", async (err, response) => {
+        if(!response)
+            throw new Exception("BACKEND doesn't run or is inaccessible")
         response.resume()
         var data = ""
         response.addListener('data', chunk => {
             data += chunk
         })
-        response.addListener('end', ()=>{
+        response.addListener('end', async ()=>{
             let receivedObject = JSON.parse(data);
             console.log(receivedObject)
-            let parsedData = changeAnalyzedDataFormat(receivedObject);
-            parsedData.path = path
-            console.log("PARSED DATA: ");
-            console.log(parsedData)
-            // base64.saveBase64ToFile(parsedData.clientImage, path);
-            ImageStack.findOneAndUpdate( { _id: id } , 
-                { $push: { processed: parsedData }, $inc: {finished: 1}  })
-            .then(res => { 
-                console.log("SUCCES IN SAVING MODEL")
-                console.log(res)
-         },
-            err => {
-                console.log("ERROR")
-                console.log(err)
-            })
+            try{
+
+                let parsedData = changeAnalyzedDataFormat(receivedObject);
+                parsedData.path = path
+                console.log("PARSED DATA: ");
+                console.log(parsedData)
+                await base64.saveBase64ToFile(receivedObject.clientImage, path);
+                
+                ImageStack.findOneAndUpdate( { _id: id } , 
+                    { $push: { processed: parsedData }, $inc: {finished: 1}  })
+                    .then(res => { 
+                        console.log("SUCCES IN SAVING MODEL")
+                        console.log(res)
+                    },
+                    err => {
+                        console.log("ERROR")
+                        console.log(err)
+                    })
+            }catch(err){
+                console.log("ERROR ON BACK-END");
+                ImageStack.findOneAndUpdate( { _id: id},
+                    {$inc: {total: -1}});
+            }
         })
     })
 }
