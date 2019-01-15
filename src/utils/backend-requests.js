@@ -20,7 +20,9 @@ function changeAnalyzedDataFormat(data){
         lines: [],
         blocks: [],
         paragraphs: [],
-        footnote: null
+        words : [],
+        footnote: null,
+        sidenotes: []
     }
     // console.log(data)
     
@@ -29,8 +31,15 @@ function changeAnalyzedDataFormat(data){
         if(Array.isArray(block.lines))
         for(let line of block.lines){
             result.lines.push(parsePositionObject(line))
+            for(let word of line.words)
+                result.words.push(parsePositionObject(word));
         }
     }
+
+    for(let sidenote of data.sidenotes){
+        result.sidenotes.push(parsePositionObject(sidenote))
+    }
+
     for(let paragraph of data.paragraphs){
         result.paragraphs.push(parsePositionObject(paragraph))
     }
@@ -57,6 +66,7 @@ function sendFile(path, id){
         })
         response.addListener('end', async ()=>{
             let receivedObject = JSON.parse(data);
+            fs.writeFileSync("data.json", data);
             console.log(receivedObject)
             try{
 

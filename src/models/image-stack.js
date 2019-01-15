@@ -28,6 +28,12 @@ const ImageStack = mongoose.model("ImageStack", {
         x2: Number,
         y2: Number
       },
+      sidenotes: [{
+          x1: Number,
+          y1: Number,
+          x2: Number,
+          y2: Number
+      }],
       paragraphs: [
         {
           x1: Number,
@@ -35,7 +41,17 @@ const ImageStack = mongoose.model("ImageStack", {
           x2: Number,
           y2: Number
         }
+      ],
+      
+      words: [
+        {
+          x1: Number,
+          y1: Number,
+          x2: Number,
+          y2: Number
+        }
       ]
+
     }
   ],
   total: Number,
