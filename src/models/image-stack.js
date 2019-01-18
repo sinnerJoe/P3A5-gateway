@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 
 const ImageStack = mongoose.model("ImageStack", {
-  unprocessed: Array,
   token: String,
   processed: [
     {
@@ -50,7 +49,14 @@ const ImageStack = mongoose.model("ImageStack", {
           x2: Number,
           y2: Number
         }
-      ]
+      ],
+
+      header: {
+        x1: Number,
+        y1: Number,
+        x2: Number,
+        y2: Number
+      }
 
     }
   ],

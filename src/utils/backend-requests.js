@@ -46,6 +46,10 @@ function changeAnalyzedDataFormat(data){
     if(data.footnote){
         result.footnote = parsePositionObject(data.footnote)
     }
+
+    if(data.header){
+        result.header = parsePositionObject(data.header)
+    }
     return result;
 }
 
